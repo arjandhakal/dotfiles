@@ -61,6 +61,16 @@ return require('packer').startup(function(use)
         }
     }
 
+
+    -- markdown preview
+    -- Starting the preview :MarkdownPreview
+    -- Stoping the preivew :MarkdownPreviewStop
+    use({
+        "iamcco/markdown-preview.nvim",
+        run = function() vim.fn["mkdp#util#install"]() end,
+    })
+
+
     -- for formatters and linters
     use('jose-elias-alvarez/null-ls.nvim')
 end)
