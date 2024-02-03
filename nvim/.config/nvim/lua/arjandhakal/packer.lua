@@ -19,6 +19,12 @@ return require('packer').startup(function(use)
         end
     })
 
+    use { "catppuccin/nvim", as = "catppuccin",
+        config = function()
+            vim.cmd('colorscheme catppuccin')
+        end
+    }
+
     use {
         'nvim-treesitter/nvim-treesitter',
         run = function()
