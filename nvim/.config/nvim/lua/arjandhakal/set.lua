@@ -28,3 +28,6 @@ vim.opt.isfname:append("@-@")
 
 vim.opt.updatetime = 50
 
+-- automatically reads a file when it was modified outside of neovim , very useful
+-- if i make a change from somewhere else (like vscode)
+vim.opt.autoread = true
