@@ -44,3 +44,7 @@ vim.api.nvim_create_autocmd({ "BufEnter", "CursorHold", "CursorHoldI", "FocusGai
 
 -- synchronize with the clipboard --
 vim.opt.clipboard = "unnamedplus"
+
+
+-- shows the changes you make when you do something like search and replace with %s , for example
+vim.opt.inccommand = "split"
