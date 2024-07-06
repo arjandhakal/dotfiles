@@ -17,7 +17,8 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
     'Olical/conjure',
     {
-        'nvim-telescope/telescope.nvim', version  = '0.1.4',
+        'nvim-telescope/telescope.nvim',
+        version      = '0.1.4',
         -- or                            , branch = '0.1.x',
         dependencies = { { 'nvim-lua/plenary.nvim' } }
     },
@@ -28,17 +29,17 @@ require("lazy").setup({
             vim.cmd('colorscheme rose-pine')
         end
     },
-    { "catppuccin/nvim", as = "catppuccin",
+    {
+        "catppuccin/nvim",
+        as = "catppuccin",
         config = function()
             vim.cmd('colorscheme catppuccin')
         end
     },
     {
         'nvim-treesitter/nvim-treesitter',
-        build = function()
-            local ts_update = require('nvim-treesitter.install').update({ with_sync = true })
-            ts_update()
-        end,
+        build = ":TSUpdate",
+        commit = "5a8e964"
     },
     'nvim-treesitter/playground',
     'theprimeagen/harpoon',

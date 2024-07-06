@@ -2,12 +2,6 @@ local lsp = require("lsp-zero")
 
 lsp.preset("recommended")
 
-lsp.ensure_installed({
-    'tsserver',
-    'eslint',
-    'lua_ls',
-    'rust_analyzer',
-})
 
 -- Fix Undefined global 'vim'
 lsp.configure('lua_ls', {
@@ -30,8 +24,10 @@ lsp.configure("yamlls", {
 
 
 local cmp = require('cmp')
+local cmp_action = require('lsp-zero').cmp_action()
+
 local cmp_select = { behavior = cmp.SelectBehavior.Select }
-local cmp_mappings = lsp.defaults.cmp_mappings({
+local cmp_mappings = cmp.mapping.preset.insert({
     ['<C-p>'] = cmp.mapping.select_prev_item(cmp_select),
     ['<C-n>'] = cmp.mapping.select_next_item(cmp_select),
     ['<C-y>'] = cmp.mapping.confirm({ select = true }),
@@ -43,9 +39,10 @@ local cmp_mappings = lsp.defaults.cmp_mappings({
 cmp_mappings['<Tab>'] = nil
 cmp_mappings['<S-Tab>'] = nil
 
-lsp.setup_nvim_cmp({
+cmp.setup({
     mapping = cmp_mappings
 })
+
 
 lsp.set_preferences({
     sign_icons = {
@@ -64,7 +61,7 @@ lsp.on_attach(function(client, bufnr)
     --      return
     --  end
 
-    -- format on save with active server 
+    -- format on save with active server
     lsp.buffer_autoformat()
 
     vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -81,6 +78,16 @@ end)
 
 
 lsp.setup()
+
+require('mason').setup({})
+require('mason-lspconfig').setup({
+    ensure_installed = {
+        'tsserver',
+        'eslint',
+        'lua_ls',
+        'rust_analyzer',
+    }
+})
 
 vim.diagnostic.config({
     virtual_text = true,
