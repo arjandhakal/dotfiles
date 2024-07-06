@@ -22,6 +22,13 @@ lsp.configure("yamlls", {
     }
 })
 
+lsp.configure("tsserver", {
+    settings = {
+        completions = {
+            completeFunctionCalls = true
+        }
+    }
+})
 
 local cmp = require('cmp')
 local cmp_action = require('lsp-zero').cmp_action()
@@ -53,6 +60,34 @@ lsp.set_preferences({
     }
 })
 
+require('mason').setup({})
+local lspconfig = require('lspconfig')
+local lsp_capabilities = require('cmp_nvim_lsp').default_capabilities()
+require('mason-lspconfig').setup({
+    ensure_installed = {
+        'tsserver',
+        'eslint',
+        'html',
+        'cssls'
+    },
+    handlers = {
+        function(server)
+            lspconfig[server].setup({
+                capabilities = lsp_capabilities,
+            })
+        end,
+        ['tsserver'] = function()
+            lspconfig.tsserver.setup({
+                capabilities = lsp_capabilities,
+                settings = {
+                    completions = {
+                        completeFunctionCalls = true
+                    }
+                }
+            })
+        end
+    }
+})
 lsp.on_attach(function(client, bufnr)
     local opts = { buffer = bufnr, remap = false }
 
@@ -79,15 +114,6 @@ end)
 
 lsp.setup()
 
-require('mason').setup({})
-require('mason-lspconfig').setup({
-    ensure_installed = {
-        'tsserver',
-        'eslint',
-        'lua_ls',
-        'rust_analyzer',
-    }
-})
 
 vim.diagnostic.config({
     virtual_text = true,
