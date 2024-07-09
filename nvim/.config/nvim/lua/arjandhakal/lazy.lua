@@ -39,7 +39,6 @@ require("lazy").setup({
     {
         'nvim-treesitter/nvim-treesitter',
         build = ":TSUpdate",
-        commit = "5a8e964"
     },
     'nvim-treesitter/playground',
     'theprimeagen/harpoon',
