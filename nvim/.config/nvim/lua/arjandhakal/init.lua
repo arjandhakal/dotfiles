@@ -1,3 +1,3 @@
 require("arjandhakal.remap")
 require("arjandhakal.set")
-require("arjandhakal.lazy")
+require("arjandhakal.lazy-plugins")
