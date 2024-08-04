@@ -91,12 +91,6 @@ require('mason-lspconfig').setup({
 lsp.on_attach(function(client, bufnr)
     local opts = { buffer = bufnr, remap = false }
 
-    if client.name == "eslint" then
-        client.stop()
-        --vim.cmd.LspStop('eslint')
-        return
-    end
-
     -- format on save with active server
     lsp.buffer_autoformat()
 
