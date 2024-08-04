@@ -1,6 +1,7 @@
 local null_ls = require("null-ls")
 
 null_ls.setup({
+    debounce = 250, -- Debouncing, mainly for Eslint execution
     sources = {
         null_ls.builtins.formatting.prettier,
         null_ls.builtins.diagnostics.eslint.with({
