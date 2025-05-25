@@ -1,6 +1,13 @@
-(load "./package.el")
-(eval-when-compile
-  (require 'use-package))
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(package-initialize)
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(require 'use-package)
+(setq use-package-always-ensure t)
 
 (global-set-key [remap list-buffers] 'ibuffer)
 ;;(load-theme 'dracula)
@@ -212,3 +219,48 @@
 
 ;; Create the lockfiles directory if it doesn't exist
 (make-directory "~/.emacs.d/lockfiles" t)
+
+
+;; LSPss
+;; Install and configure YASnippet for LSP snippet support
+(use-package yasnippet
+  :config
+  (yas-global-mode 1)) ;; Enable YASnippet globally
+
+;; Install and configure Company for autocompletion
+(use-package company
+  :hook (prog-mode . company-mode) ;; Enable in programming modes
+  :config
+  (setq company-idle-delay 0.2) ;; Faster completion
+  (setq company-minimum-prefix-length 1))
+
+;; Install and configure Flycheck for LSP diagnostics
+(use-package flycheck
+  :hook (prog-mode . flycheck-mode) ;; Enable in programming modes
+  :config
+  (setq flycheck-check-syntax-automatically '(save mode-enabled)))
+
+
+(use-package lsp-mode
+  :ensure t
+  :defer t
+  :hook ((clojure-mode       . lsp)
+         (clojurec-mode      . lsp)
+         (lsp-mode           . lsp-enable-which-key-integration))
+  :bind (:map lsp-mode-map
+              ("C-M-."      . lsp-find-references)
+              ("C-c r"      . lsp-rename)
+              ("M-<return>" . lsp-execute-code-action))
+  :config
+  (setq lsp-diagnostics-provider :flycheck)
+        ;; Disable visual features
+  (setq lsp-headerline-breadcrumb-enable nil   ;; No breadcrumbs
+        lsp-ui-sideline-enable           nil   ;; No sideline
+        lsp-lens-enable                  nil   ;; No lenses
+
+        ;; Disable all mode line features, since I use a custom mode line
+        lsp-modeline-code-actions-enable nil
+        lsp-modeline-diagnostics-enable  nil
+
+        ;; Limit raising of the echo area to show docs
+        lsp-signature-doc-lines 3))
