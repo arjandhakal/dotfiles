@@ -264,3 +264,13 @@
 
         ;; Limit raising of the echo area to show docs
         lsp-signature-doc-lines 3))
+
+
+
+;; Enabling movement by Shift Keys
+(windmove-default-keybindings)
+
+
+
+;; Hiding dired mode details
+(add-hook 'dired-mode-hook 'dired-hide-details-mode)
