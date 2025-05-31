@@ -10,13 +10,17 @@
 (setq use-package-always-ensure t)
 
 (global-set-key [remap list-buffers] 'ibuffer)
-;;(load-theme 'dracula)
+;; Some themes
+(unless (package-installed-p 'doom-themes)
+  (package-install 'doom-themes))
+(require 'doom-themes)
+(load-theme 'doom-one t) ; Use 'doom-one' for a dark theme similar to Doom Emacs
 
 ;; removing unneeded windows (tool bar and menu bar)
 (tool-bar-mode 0)
 (menu-bar-mode 0)
 (scroll-bar-mode 0)
-
+(setq frame-title-format "Arjan's Emacs - %b")
 
 ;; Download Evil
 (unless (package-installed-p 'evil)
@@ -72,12 +76,6 @@
 ;; Racket Mode
 (unless (package-installed-p 'racket-mode)
   (package-install 'racket-mode))
-
-;; Themes
-(use-package dracula-theme
-  :ensure t
-  :config
-  (load-theme 'dracula t))
 
 ;;  Setting up any ts file to use typescript mode
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
