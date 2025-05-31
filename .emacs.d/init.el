@@ -25,12 +25,23 @@
 ;; Enable Evil
 (require 'evil)
 (evil-mode 1)
-;; Downloading another keyboard mode because I don't want
-;; pinky finger
-(unless (package-installed-p 'meow)
-  (package-install 'meow))
-
-
+;; Disabling some evil overrides with emacs default
+;; A very good list is available here
+;; https://github.com/noctuid/evil-guide/blob/master/README.org#use-some-emacs-keybindings
+(define-key evil-insert-state-map (kbd "C-v") nil)       ; Restores scroll-up-command
+(define-key evil-insert-state-map (kbd "C-k") nil)       ; Restores kill-line
+(define-key evil-insert-state-map (kbd "C-o") nil)       ; Restores open-line
+(define-key evil-insert-state-map (kbd "C-r") nil)       ; Restores isearch-backward
+(define-key evil-insert-state-map (kbd "C-y") nil)       ; Restores yank
+(define-key evil-insert-state-map (kbd "C-e") nil)       ; Restores move-end-of-line
+(define-key evil-insert-state-map (kbd "C-n") nil)       ; Restores next-line
+(define-key evil-insert-state-map (kbd "C-p") nil)       ; Restores previous-line
+(define-key evil-insert-state-map (kbd "C-x C-n") nil)   ; Restores set-goal-column
+(define-key evil-insert-state-map (kbd "C-x C-p") nil)   ; Restores mark-page
+(define-key evil-insert-state-map (kbd "C-t") nil)       ; Restores transpose-chars
+(define-key evil-insert-state-map (kbd "C-d") nil)       ; Restores delete-char
+(define-key evil-insert-state-map (kbd "C-a") nil)       ; Restores move-beginning-of-line
+(define-key evil-insert-state-map (kbd "C-w") nil)       ; Restores kill-region
 ;; Clojure Mode
 (unless (package-installed-p 'clojure-mode)
   (package-install 'clojure-mode))
