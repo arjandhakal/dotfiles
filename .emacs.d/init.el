@@ -24,8 +24,7 @@
 
 ;; Enable Evil
 (require 'evil)
-(evil-mode 0)
-
+(evil-mode 1)
 ;; Downloading another keyboard mode because I don't want
 ;; pinky finger
 (unless (package-installed-p 'meow)
@@ -266,7 +265,13 @@
         lsp-modeline-diagnostics-enable  nil
 
         ;; Limit raising of the echo area to show docs
-        lsp-signature-doc-lines 3))
+        lsp-signature-doc-lines 3)
+;; Ensure typescript-language-server is used for TypeScript and TSX
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection '("typescript-language-server" "--stdio"))
+    :major-modes '(typescript-ts-mode tsx-ts-mode)
+    :server-id 'ts-ls)))
 
 
 
@@ -299,6 +304,7 @@
 
 ;; Tree sitter for major libraries
 (use-package treesit
+      :ensure nil
       :mode (("\\.tsx\\'" . tsx-ts-mode)
              ("\\.js\\'"  . typescript-ts-mode)
              ("\\.mjs\\'" . typescript-ts-mode)
@@ -365,3 +371,39 @@
         (add-to-list 'major-mode-remap-alist mapping))
       :config
       (os/setup-install-grammars))
+
+
+
+;; Install and configure nov package
+(use-package nov
+  :ensure t
+  :mode ("\\.epub\\'" . nov-mode)
+  :config
+  (setq nov-text-width 80))
+
+
+;; Make sure to have poppler installed
+;; so that pdf-tools can properly render it
+;; Configure pdf-tools
+(use-package pdf-tools
+  :ensure t
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :config
+  ;; Enable pdf-tools installation (compiles native components)
+  (pdf-tools-install)
+  ;; Optimize for comfortable reading
+  (setq pdf-view-display-size 'fit-page)  ; Fit page to window width
+  (setq pdf-view-continuous t)           ; Smooth scrolling
+  (setq pdf-view-midnight-colors '("#ffffff" . "#1e1e1e")) ; Dark mode for night reading
+  ;; Keybindings for convenience
+  (bind-key "C-+" 'pdf-view-enlarge pdf-view-mode-map)
+  (bind-key "C--" 'pdf-view-shrink pdf-view-mode-map)
+  (bind-key "j" 'pdf-view-next-line-or-next-page pdf-view-mode-map)
+  (bind-key "k" 'pdf-view-previous-line-or-previous-page pdf-view-mode-map)
+  (bind-key "g" 'pdf-view-goto-page pdf-view-mode-map)
+  :hook
+  (pdf-view-mode . (lambda ()
+                     ;; Auto-revert for live updates (e.g., if PDF changes)
+                     (auto-revert-mode)
+                     ;; Optional: Enable midnight mode (dark theme) by default
+                     (pdf-view-midnight-minor-mode))))
