@@ -58,6 +58,11 @@
 (unless (package-installed-p 'rainbow-delimiters)
   (package-install 'rainbow-delimiters))
 
+;; Racket Mode
+(unless (package-installed-p 'racket-mode)
+  (package-install 'racket-mode))
+
+
 (setq display-line-numbers 'relative)
 (global-display-line-numbers-mode 1)
 
@@ -66,6 +71,10 @@
 (if (package-installed-p 'rainbow-delimiters)
     (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
 
+;; Adding hook to run rainbow delimeters mode when Racket
+(if (package-installed-p 'rainbow-delimiters)
+    (add-hook 'racket-mode #'rainbow-delimiters-mode))
+
 ;; Paredit
 (unless (package-installed-p 'paredit)
   (package-install 'paredit))
@@ -73,9 +82,10 @@
 (if (package-installed-p 'paredit)
     (add-hook 'clojure-mode-hook #'paredit-mode))
 
-;; Racket Mode
-(unless (package-installed-p 'racket-mode)
-  (package-install 'racket-mode))
+;; Enable Paredit for Racket mode
+(when (package-installed-p 'paredit)
+  (add-hook 'racket-mode-hook #'paredit-mode))
+
 
 ;;  Setting up any ts file to use typescript mode
 (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
