@@ -14,7 +14,7 @@
 (unless (package-installed-p 'doom-themes)
   (package-install 'doom-themes))
 (require 'doom-themes)
-(load-theme 'doom-one t) ; Use 'doom-one' for a dark theme similar to Doom Emacs
+(load-theme 'doom-shades-of-purple t) ; Use 'doom-one' for a dark theme similar to Doom Emacs
 
 ;; removing unneeded windows (tool bar and menu bar)
 (tool-bar-mode 0)
@@ -133,18 +133,25 @@
 ;; Further reading: https://protesilaos.com/emacs/dotemacs#h:22e97b4c-d88d-4deb-9ab3-f80631f9ff1d
 (use-package consult
   :ensure t
-  :bind (;; A recursive grep
+  :bind (:map global-map
+         ;; A recursive grep
          ("M-s M-g" . consult-grep)
-         ;; Search for files names recursively
-         ("M-s M-f" . consult-find)
          ;; Search through the outline (headings) of the file
          ("M-s M-o" . consult-outline)
          ;; Search the current buffer
-         ("M-s M-l" . consult-line)
-         ;; Switch to another buffer, or bookmarked file, or recently
-         ;; opened file.
-         ("M-s M-b" . consult-buffer)))
-
+         ("M-s M-l" . consult-line))
+  :init
+  ;; Define a custom keymap for SPC leader key
+  (defvar my-spc-map (make-sparse-keymap)
+    "Custom keymap for SPC leader key in Evil normal and visual states.")
+  ;; Set SPC as leader key in Evil normal and visual states
+  (with-eval-after-load 'evil
+    (define-key evil-normal-state-map (kbd "SPC") my-spc-map)
+    (define-key evil-visual-state-map (kbd "SPC") my-spc-map))
+  ;; Define bindings in the SPC keymap
+  (define-key my-spc-map (kbd "SPC") #'consult-find)
+  (define-key my-spc-map (kbd ".") #'consult-buffer)
+  (define-key my-spc-map (kbd "f r") #'consult-recent-file))
 
 ;; The `orderless' package lets the minibuffer use an out-of-order
 ;; pattern matching algorithm.  It matches space-separated words or
@@ -426,3 +433,8 @@
                      (auto-revert-mode)
                      ;; Optional: Enable midnight mode (dark theme) by default
                      (pdf-view-midnight-minor-mode))))
+
+
+;; Mac only
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+(add-to-list 'default-frame-alist '(ns-appearance . dark))
