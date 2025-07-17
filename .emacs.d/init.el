@@ -49,7 +49,7 @@
 ;; Clojure Mode
 (unless (package-installed-p 'clojure-mode)
   (package-install 'clojure-mode))
-
+(add-to-list 'auto-mode-alist '("\\.edn\\'" . clojure-mode))
 ;; Cider
 (unless (package-installed-p 'cider)
   (package-install 'cider))
@@ -152,6 +152,9 @@
   (define-key my-spc-map (kbd "SPC") #'consult-find)
   (define-key my-spc-map (kbd ".") #'consult-buffer)
   (define-key my-spc-map (kbd "f r") #'consult-recent-file))
+
+(setq consult-find-args "find . -not ( -path '*/dist/*' -o -path '*/node_modules/*' )")
+
 
 ;; The `orderless' package lets the minibuffer use an out-of-order
 ;; pattern matching algorithm.  It matches space-separated words or
@@ -341,6 +344,7 @@
              ("\\.json\\'" .  json-ts-mode)
              ("\\.Dockerfile\\'" . dockerfile-ts-mode)
              ("\\.prisma\\'" . prisma-ts-mode)
+	     ("\\.go\\'" . go-ts-mode)
              ;; More modes defined here...
              )
       :preface
@@ -484,3 +488,56 @@
           org-roam-ui-follow t
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
+
+
+;; Terraform Mode
+(use-package terraform-mode
+  ;; if using straight
+  ;; :straight t
+
+  ;; if using package.el
+  ;; :ensure t
+  :custom (terraform-indent-level 4)
+  :config
+  (defun my-terraform-mode-init ()
+    ;; if you want to use outline-minor-mode
+    ;; (outline-minor-mode 1)
+    )
+
+  (add-hook 'terraform-mode-hook 'my-terraform-mode-init))
+
+;; Configure Org Babel for restclient
+(use-package ob-restclient
+  :ensure t)
+
+(org-babel-do-load-languages
+    'org-babel-load-languages
+    '((restclient . t)
+      (python . t)
+      (scheme . t)))
+
+;; Ensure Org-mode is loaded and configured for Clojure
+(use-package org
+  :ensure t
+  :config
+  (require 'ob-clojure)
+  (setq org-babel-clojure-backend 'cider))
+
+
+
+;; Hooking up Emacs with a local
+;; running instance of LLM
+;; using gptel
+(use-package gptel
+  :ensure t)
+(setq
+ gptel-model 'gemma3:12b-it-qat
+ gptel-backend (gptel-make-ollama "Ollama"
+                 :host "localhost:11434"
+                 :stream t
+                 :models '(gemma3:12b-it-qat)))
+
+;; General Packages
+(use-package project)
+
+
