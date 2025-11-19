@@ -274,6 +274,7 @@
   :defer t
   :hook ((clojure-mode       . lsp)
          (clojurec-mode      . lsp)
+	 (java-ts-mode      . lsp-deferred)
 	 ((tsx-ts-mode
 	   typescript-ts-mode
 	   js-ts-mode) . lsp-deferred)
@@ -302,7 +303,20 @@
     :major-modes '(typescript-ts-mode tsx-ts-mode)
     :server-id 'ts-ls)))
 
+;; JAVA LSP
+(use-package lsp-java
+  :ensure t
+  :defer t
+  :hook (java-ts-mode . lsp-deferred) ; <-- MUST match your treesit mode
+  :config
+  ;; Set the path to your JDK (Java Development Kit)
+  ;; 1. Find your JDK path by running this in your Mac terminal: /usr/libexec/java_home
+  ;; 2. Copy the path it prints and paste it below, replacing the placeholder.
+  (setq lsp-java-home "/opt/homebrew/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home") ; <-- !! REPLACE THIS !!
 
+  ;; Set a custom directory for the server installation
+  (setq lsp-java-server-install-dir (concat user-emacs-directory ".lsp-java-server/"))
+  )
 
 ;; Enabling movement by Shift Keys
 (windmove-default-keybindings)
@@ -345,6 +359,7 @@
              ("\\.Dockerfile\\'" . dockerfile-ts-mode)
              ("\\.prisma\\'" . prisma-ts-mode)
 	     ("\\.go\\'" . go-ts-mode)
+	     ("\\.java\\'" . java-ts-mode)
              ;; More modes defined here...
              )
       :preface
@@ -360,6 +375,7 @@
                    (python . ("https://github.com/tree-sitter/tree-sitter-python" "v0.20.4"))
                    (go "https://github.com/tree-sitter/tree-sitter-go" "v0.20.0")
                    (markdown "https://github.com/ikatyang/tree-sitter-markdown")
+		   (java "https://github.com/tree-sitter/tree-sitter-java")
                    (make "https://github.com/alemuller/tree-sitter-make")
                    (elisp "https://github.com/Wilfred/tree-sitter-elisp")
                    (cmake "https://github.com/uyha/tree-sitter-cmake")
@@ -397,6 +413,7 @@
                  (json-mode . json-ts-mode)
                  (js-json-mode . json-ts-mode)
                  (sh-mode . bash-ts-mode)
+		 (java-mode . java-ts-mode)
                  (sh-base-mode . bash-ts-mode)))
         (add-to-list 'major-mode-remap-alist mapping))
       :config
@@ -476,6 +493,18 @@
   ;; If using org-roam-protocol
   (require 'org-roam-protocol))
 
+;; Using Org Journal
+(use-package org-journal
+  :ensure t
+  :defer t
+  :init
+  ;; Change default prefix key; needs to be set before loading org-journal
+  (setq org-journal-prefix-key "C-c j ")
+  :config
+  (setq org-journal-dir "~/arjan-files/Documents/personal/journal"
+        org-journal-date-format "%A, %d %B %Y"))
+
+
 
 (use-package org-roam-ui
     :after org-roam
@@ -541,3 +570,69 @@
 (use-package project)
 
 
+;; Using ORG Mode (mermaid)
+;; Link: https://emacstil.com/til/2021/09/19/org-mermaid/
+;; brew install mermaid-cli (mac)
+;; (setq ob-mermaid-cli-path "/usr/local/bin/mmdc")
+;; Usage
+;; In any org file, you can use `mermaid` source type, and specify the output file’s name:
+;;
+; #+begin_src mermaid :file test.png
+;; sequenceDiagram
+;;  A-->B: Works!
+;; #+end_src
+
+(use-package ob-mermaid
+  :ensure t
+  :config
+  (setq ob-mermaid-cli-path "/opt/homebrew/bin/mmdc"))
+
+
+;; This block ensures org-modern is installed and applies all your desired
+;; settings specifically and only when Org mode is active.
+
+;; 1. Configure and load the org-modern package
+(use-package org-modern
+  :ensure t ; Automatically installs the package if it's not already there
+  :hook
+  (org-mode . org-modern-mode)          ; Enable modern look in Org files
+  (org-agenda-finalize . org-modern-agenda)) ; Enable modern look for the agenda
+
+;; 2. Create a function for your custom Org settings
+(defun my-custom-org-mode-settings ()
+  "Apply my preferred settings for Org mode."
+  ;; Enable visual indentation for headlines and content
+  (org-indent-mode)
+
+  ;; --- FONT SETTINGS FOR ORG-MODE ---
+  ;; brew install --cask font-iosevka
+  ;; Remap the default monospace font to Iosevka for this buffer
+  (face-remap-add-relative 'default '(:family "Iosevka" :height 1.0))
+
+  ;; Remap the variable-pitch font (for proportional text) to Iosevka Aile
+  (face-remap-add-relative 'variable-pitch '(:family "Iosevka Aile" :height 1.0))
+
+  ;; Set the specific font for org-modern's symbols
+  ;(set-face-attribute 'org-modern-symbol nil :family "Iosevka")
+
+  ;; Displaying image
+  (setq org-startup-with-inline-images t)
+
+
+  ;; The `setq` form configures multiple variables at once.
+  (setq
+   ;; Editing settings
+   org-auto-align-tags nil
+   org-tags-column 0
+   org-catch-invisible-edits 'show-and-error
+   org-special-ctrl-a/e t
+   org-insert-heading-respect-content t
+
+   ;; Styling settings
+   org-hide-emphasis-markers t
+   org-pretty-entities t
+   org-ellipsis "…"))
+
+;; 3. Add your custom settings to org-mode-hook
+;; This is the crucial step that makes your settings apply *only* to Org files.
+(add-hook 'org-mode-hook #'my-custom-org-mode-settings)
