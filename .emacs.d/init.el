@@ -285,9 +285,9 @@
               ("M-<return>" . lsp-execute-code-action))
   :config
   (setq lsp-diagnostics-provider :flycheck)
-        ;; Disable visual features
+  ;; Disable visual features
   (setq lsp-headerline-breadcrumb-enable nil   ;; No breadcrumbs
-        lsp-ui-sideline-enable           nil   ;; No sideline
+	lsp-ui-sideline-enable           nil   ;; No sideline
         lsp-lens-enable                  nil   ;; No lenses
 
         ;; Disable all mode line features, since I use a custom mode line
@@ -318,9 +318,10 @@
   (setq lsp-java-server-install-dir (concat user-emacs-directory ".lsp-java-server/"))
   )
 
+
+
 ;; Enabling movement by Shift Keys
 (windmove-default-keybindings)
-
 
 
 ;; Automatically hide the detailed listing when visiting a Dired
@@ -636,3 +637,26 @@
 ;; 3. Add your custom settings to org-mode-hook
 ;; This is the crucial step that makes your settings apply *only* to Org files.
 (add-hook 'org-mode-hook #'my-custom-org-mode-settings)
+
+;; Adding breadcrumb 
+(use-package breadcrumb
+  :ensure t
+  :hook
+  ;; Use the buffer-local mode provided in the source, 
+  ;; rather than the global mode.
+  ((prog-mode . breadcrumb-local-mode)
+   (markdown-mode . breadcrumb-local-mode))
+  
+  :config
+  ;; The source code defines specific variables for project vs imenu separators.
+  ;; We set both to a cleaner symbol.
+  (setq breadcrumb-project-crumb-separator " › "
+        breadcrumb-imenu-crumb-separator " › ")
+
+  ;; Don't let the project path eat up the whole header line.
+  ;; (Keeps 50% of space available for the function/imenu path)
+  (setq breadcrumb-project-max-length 0.5)
+  
+  ;; optional: adjust how quickly it updates (default is usually fine)
+  ;; (setq breadcrumb-idle-delay 0.5) 
+  )
