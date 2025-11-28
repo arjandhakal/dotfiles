@@ -660,3 +660,9 @@
   ;; optional: adjust how quickly it updates (default is usually fine)
   ;; (setq breadcrumb-idle-delay 0.5) 
   )
+
+
+;; Clomacs
+(use-package clomacs)
+
+;;
