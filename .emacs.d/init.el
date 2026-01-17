@@ -303,6 +303,14 @@
     :major-modes '(typescript-ts-mode tsx-ts-mode)
     :server-id 'ts-ls)))
 
+;; Formatting Clojure files on save
+;; (defun my-clojure-lsp-format-hook ()
+;;   (add-hook 'before-save-hook #'lsp-format-buffer nil 'local))
+
+;; (add-hook 'clojure-mode-hook #'my-clojure-lsp-format-hook)
+;; (add-hook 'clojurescript-mode-hook #'my-clojure-lsp-format-hook)
+;; (add-hook 'clojurec-mode-hook #'my-clojure-lsp-format-hook)
+
 ;; JAVA LSP
 (use-package lsp-java
   :ensure t
@@ -488,11 +496,16 @@
          ;; Dailies
          ("C-c n j" . org-roam-dailies-capture-today))
   :config
+  (setq org-roam-capture-templates
+        '(("d" "default" plain "%?"
+           ;; CHANGED: Removed "%<%Y%m%d%H%M%S>-" from the filename
+           :target (file+head "${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)))
   ;; If you're using a vertical completion framework, you might want a more informative completion interface
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   (org-roam-db-autosync-mode)
   ;; If using org-roam-protocol
-  (require 'org-roam-protocol))
+  (require 'org-roam-protocol)
 
 ;; Using Org Journal
 (use-package org-journal
@@ -664,5 +677,24 @@
 
 ;; Clomacs
 (use-package clomacs)
+
+;; FOR SICP with GUILE
+;;https://github.com/emacsmirror/geiser-guile
+(use-package geiser-guile
+  :ensure t
+  :config
+  (setq geiser-guile-binary "/opt/homebrew/bin/guile")
+  ;; Configure load paths for project-specific modules (discussed in Section 6)
+  (add-to-list 'geiser-guile-load-path "~/sicp-work/lib")
+  (add-hook 'scheme-mode-hook 'enable-paredit-mode)
+  (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode))
+;;
+
+;; Racket for Picture Language 
+(use-package geiser-racket
+  :ensure t
+  :config
+  (setq geiser-active-implementations '(guile racket))
+  (setq geiser-racket-binary "/Applications/Racket v8.16/bin/racket")) ;; Adjust version number as needed
 
 ;;
