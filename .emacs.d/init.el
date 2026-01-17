@@ -1,3 +1,11 @@
+;; Increase GC threshold to 100MB during startup
+(setq gc-cons-threshold (* 100 1024 1024))
+
+;; Reset it to a reasonable default (2MB) after startup
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold (* 2 1024 1024))))
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 ;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
@@ -8,6 +16,17 @@
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+;; Ensure environment variables are loaded from shell on macOS
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize)))
+
+(use-package which-key
+  :ensure t
+  :init (which-key-mode))
 
 (global-set-key [remap list-buffers] 'ibuffer)
 ;; Some themes
@@ -22,30 +41,36 @@
 (scroll-bar-mode 0)
 (setq frame-title-format "Arjan's Emacs - %b")
 
-;; Download Evil
-(unless (package-installed-p 'evil)
-  (package-install 'evil))
+;; This variable must be set BEFORE evil is loaded.
+(setq evil-want-keybinding nil)
 
-;; Enable Evil
-(require 'evil)
-(evil-mode 1)
-;; Disabling some evil overrides with emacs default
-;; A very good list is available here
-;; https://github.com/noctuid/evil-guide/blob/master/README.org#use-some-emacs-keybindings
-(define-key evil-insert-state-map (kbd "C-v") nil)       ; Restores scroll-up-command
-(define-key evil-insert-state-map (kbd "C-k") nil)       ; Restores kill-line
-(define-key evil-insert-state-map (kbd "C-o") nil)       ; Restores open-line
-(define-key evil-insert-state-map (kbd "C-r") nil)       ; Restores isearch-backward
-(define-key evil-insert-state-map (kbd "C-y") nil)       ; Restores yank
-(define-key evil-insert-state-map (kbd "C-e") nil)       ; Restores move-end-of-line
-(define-key evil-insert-state-map (kbd "C-n") nil)       ; Restores next-line
-(define-key evil-insert-state-map (kbd "C-p") nil)       ; Restores previous-line
-(define-key evil-insert-state-map (kbd "C-x C-n") nil)   ; Restores set-goal-column
-(define-key evil-insert-state-map (kbd "C-x C-p") nil)   ; Restores mark-page
-(define-key evil-insert-state-map (kbd "C-t") nil)       ; Restores transpose-chars
-(define-key evil-insert-state-map (kbd "C-d") nil)       ; Restores delete-char
-(define-key evil-insert-state-map (kbd "C-a") nil)       ; Restores move-beginning-of-line
-(define-key evil-insert-state-map (kbd "C-w") nil)       ; Restores kill-region
+(use-package evil
+  :ensure t
+  :config
+  (evil-mode 1)
+  ;; Disabling some evil overrides with emacs default
+  ;; A very good list is available here
+  ;; https://github.com/noctuid/evil-guide/blob/master/README.org#use-some-emacs-keybindings
+  (define-key evil-insert-state-map (kbd "C-v") nil)       ; Restores scroll-up-command
+  (define-key evil-insert-state-map (kbd "C-k") nil)       ; Restores kill-line
+  (define-key evil-insert-state-map (kbd "C-o") nil)       ; Restores open-line
+  (define-key evil-insert-state-map (kbd "C-r") nil)       ; Restores isearch-backward
+  (define-key evil-insert-state-map (kbd "C-y") nil)       ; Restores yank
+  (define-key evil-insert-state-map (kbd "C-e") nil)       ; Restores move-end-of-line
+  (define-key evil-insert-state-map (kbd "C-n") nil)       ; Restores next-line
+  (define-key evil-insert-state-map (kbd "C-p") nil)       ; Restores previous-line
+  (define-key evil-insert-state-map (kbd "C-x C-n") nil)   ; Restores set-goal-column
+  (define-key evil-insert-state-map (kbd "C-x C-p") nil)   ; Restores mark-page
+  (define-key evil-insert-state-map (kbd "C-t") nil)       ; Restores transpose-chars
+  (define-key evil-insert-state-map (kbd "C-d") nil)       ; Restores delete-char
+  (define-key evil-insert-state-map (kbd "C-a") nil)       ; Restores move-beginning-of-line
+  (define-key evil-insert-state-map (kbd "C-w") nil))       ; Restores kill-region
+
+(use-package evil-collection
+  :after evil
+  :ensure t
+  :config
+  (evil-collection-init))
 ;; Clojure Mode
 (unless (package-installed-p 'clojure-mode)
   (package-install 'clojure-mode))
@@ -67,24 +92,19 @@
 (global-display-line-numbers-mode 1)
 
 
-;; Adding hook to run rainbow delimiters mode when clojure
-(if (package-installed-p 'rainbow-delimiters)
-    (add-hook 'clojure-mode-hook #'rainbow-delimiters-mode))
+(use-package paredit :ensure t)
 
-;; Adding hook to run rainbow delimeters mode when Racket
-(if (package-installed-p 'rainbow-delimiters)
-    (add-hook 'racket-mode #'rainbow-delimiters-mode))
+;; Define a hook for all Lisp-like languages
+(defun arjan/lisp-setup ()
+  (paredit-mode 1)
+  (rainbow-delimiters-mode 1)
+  (show-paren-mode 1))
 
-;; Paredit
-(unless (package-installed-p 'paredit)
-  (package-install 'paredit))
-
-(if (package-installed-p 'paredit)
-    (add-hook 'clojure-mode-hook #'paredit-mode))
-
-;; Enable Paredit for Racket mode
-(when (package-installed-p 'paredit)
-  (add-hook 'racket-mode-hook #'paredit-mode))
+(dolist (mode '(clojure-mode-hook
+                racket-mode-hook
+                scheme-mode-hook
+                lisp-data-mode-hook))
+  (add-hook mode 'arjan/lisp-setup))
 
 
 ;;  Setting up any ts file to use typescript mode
@@ -233,20 +253,9 @@
   :ensure t)
 
 
-;; Set a directory for backup and autosave files
-(setq backup-directory-alist '(("." . "~/.emacs.d/backups")))
-(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosaves/\\1" t)))
-
-;; Create the directories if they don't exist
-(make-directory "~/.emacs.d/backups" t)
-(make-directory "~/.emacs.d/autosaves" t)
-
-
-;; Set a directory for lock files
-(setq lock-file-name-transforms '((".*" "~/.emacs.d/lockfiles/\\1" t)))
-
-;; Create the lockfiles directory if it doesn't exist
-(make-directory "~/.emacs.d/lockfiles" t)
+;; Keep .emacs.d clean
+(use-package no-littering
+  :ensure t)
 
 
 ;; LSPss
@@ -315,12 +324,14 @@
 (use-package lsp-java
   :ensure t
   :defer t
-  :hook (java-ts-mode . lsp-deferred) ; <-- MUST match your treesit mode
+  :hook (java-ts-mode . lsp-deferred)
   :config
-  ;; Set the path to your JDK (Java Development Kit)
-  ;; 1. Find your JDK path by running this in your Mac terminal: /usr/libexec/java_home
-  ;; 2. Copy the path it prints and paste it below, replacing the placeholder.
-  (setq lsp-java-home "/opt/homebrew/Cellar/openjdk/23.0.2/libexec/openjdk.jdk/Contents/Home") ; <-- !! REPLACE THIS !!
+  ;; Try to find 'java' in the path, or fallback to a standard location
+  (setq lsp-java-vmargs
+        (list "-noverify"
+              "-Xmx1G"
+              "-XX:+UseG1GC"
+              "-XX:+UseStringDeduplication"))
 
   ;; Set a custom directory for the server installation
   (setq lsp-java-server-install-dir (concat user-emacs-directory ".lsp-java-server/"))
@@ -505,7 +516,7 @@
   (setq org-roam-node-display-template (concat "${title:*} " (propertize "${tags:10}" 'face 'org-tag)))
   (org-roam-db-autosync-mode)
   ;; If using org-roam-protocol
-  (require 'org-roam-protocol)
+  (require 'org-roam-protocol))
 
 ;; Using Org Journal
 (use-package org-journal
@@ -599,7 +610,7 @@
 (use-package ob-mermaid
   :ensure t
   :config
-  (setq ob-mermaid-cli-path "/opt/homebrew/bin/mmdc"))
+  (setq ob-mermaid-cli-path (executable-find "mmdc")))
 
 
 ;; This block ensures org-modern is installed and applies all your desired
@@ -683,11 +694,9 @@
 (use-package geiser-guile
   :ensure t
   :config
-  (setq geiser-guile-binary "/opt/homebrew/bin/guile")
+  (setq geiser-guile-binary (or (executable-find "guile") "/opt/homebrew/bin/guile"))
   ;; Configure load paths for project-specific modules (discussed in Section 6)
-  (add-to-list 'geiser-guile-load-path "~/sicp-work/lib")
-  (add-hook 'scheme-mode-hook 'enable-paredit-mode)
-  (add-hook 'geiser-repl-mode-hook 'enable-paredit-mode))
+  (add-to-list 'geiser-guile-load-path "~/sicp-work/lib"))
 ;;
 
 ;; Racket for Picture Language 
@@ -695,6 +704,6 @@
   :ensure t
   :config
   (setq geiser-active-implementations '(guile racket))
-  (setq geiser-racket-binary "/Applications/Racket v8.16/bin/racket")) ;; Adjust version number as needed
+  (setq geiser-racket-binary (executable-find "racket")))
 
 ;;
