@@ -253,10 +253,15 @@
   :ensure t)
 
 
-;; Keep .emacs.d clean
-(use-package no-littering
-  :ensure t)
+;; Keep .emacs.d clean and
+;; since I'm working individually, I don't want
+;; lockfiles to be commited 
+(use-package no-littering)
+;; Set a directory for lock files
+(setq lock-file-name-transforms '((".*" "~/.emacs.d/lockfiles/\\1" t)))
 
+;; Create the lockfiles directory if it doesn't exist
+(make-directory "~/.emacs.d/lockfiles" t)
 
 ;; LSPss
 ;; Install and configure YASnippet for LSP snippet support
@@ -707,3 +712,39 @@
   (setq geiser-racket-binary (executable-find "racket")))
 
 ;;
+
+;; ELFEED: RSS Reader
+(use-package elfeed
+  :ensure t
+  :config
+  (setq elfeed-search-title-max-width 100)
+  (setq elfeed-search-title-min-width 30)
+
+  ;; Evil Mode Keybindings for Elfeed
+  (evil-define-key 'normal elfeed-search-mode-map
+    (kbd "q") 'elfeed-search-quit-window    ; q to quit the feed window
+    (kbd "r") 'elfeed-search-update--force  ; r to refresh the view
+    (kbd "RET") 'elfeed-search-show-entry   ; RET to read the article
+    (kbd "s") 'elfeed-search-set-filter)    ; s to update search filter
+
+  ;; Note on Default Keys:
+  ;; G (Shift+g) - Fetch new articles from the internet
+
+  
+  )
+
+(use-package cornell-note
+  :load-path user-emacs-directory)
+
+;; --- YOUR FEEDS LIST ---
+;; format: ("URL" tag1 tag2)
+(setq elfeed-feeds
+      '(("https://www.tedinski.com/feed.xml" architecture blog)
+	("https://arjandhakal.com.np/rss.xml" personal)
+	("https://schmud.de/feed.rss")
+	("https://simonwillison.net/atom/everything/" llm ai)
+        ))
+
+;; Add a keybinding to your existing custom leader map
+;; SPC r -> Open Elfeed
+(define-key my-spc-map (kbd "r") #'elfeed)
