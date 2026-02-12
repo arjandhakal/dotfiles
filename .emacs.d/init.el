@@ -263,6 +263,16 @@
 ;; Create the lockfiles directory if it doesn't exist
 (make-directory "~/.emacs.d/lockfiles" t)
 
+;; Set backup file location (files ending in ~)
+(setq backup-directory-alist '((".*" . "~/.emacs.d/backups/")))
+
+;; Set auto-save file location (files with # prefix)
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/auto-save-list/\\1" t)))
+
+;; Create backup and auto-save directories if they don't exist
+(make-directory "~/.emacs.d/backups" t)
+(make-directory "~/.emacs.d/auto-save-list" t)
+
 ;; LSPss
 ;; Install and configure YASnippet for LSP snippet support
 (use-package yasnippet
@@ -748,3 +758,20 @@
 ;; Add a keybinding to your existing custom leader map
 ;; SPC r -> Open Elfeed
 (define-key my-spc-map (kbd "r") #'elfeed)
+
+;; vterm - A fast terminal emulator for Emacs written in C
+;; Provides a fully-featured terminal with better performance than eshell or shell
+;; Requires libvterm to be installed (on macOS: brew install libvterm)
+(use-package vterm
+  :ensure t
+  :config
+  ;; Set a reasonable scrollback buffer size (10000 lines)
+  (setq vterm-max-scrollback 10000)
+  ;; Don't kill the buffer when the process exits, just bury it
+  (setq vterm-kill-buffer-on-exit nil)
+  ;; Enable mouse support in vterm
+  (setq vterm-enable-mouse t))
+
+;; Add a keybinding to open vterm in the existing custom leader map
+;; SPC t -> Open vterm (t for terminal)
+(define-key my-spc-map (kbd "t") #'vterm)
