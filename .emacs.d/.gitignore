@@ -1,0 +1,29 @@
+# Tangled from config.org
+config.el
+
+# Package directory
+elpa/
+
+# Customize output
+custom.el
+
+# Machine-specific settings
+personal/
+
+# Generated directories
+lockfiles/
+backups/
+auto-save-list/
+
+# LSP servers
+.lsp-java-server/
+
+# no-littering directories
+etc/
+var/
+
+# Byte-compiled
+*.elc
+
+# Native compilation cache
+eln-cache/
