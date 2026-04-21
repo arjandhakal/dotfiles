@@ -32,6 +32,14 @@ brew install mermaid-cli                         # Org mermaid diagrams
 brew install ollama                              # Local LLM
 #+end_example
 
+*Japanese input (machines with macSKK):*
+
+#+begin_example
+brew install --cask macskk                       # Japanese IME
+brew install macism                              # CLI IME switcher
+cargo install yaskkserv2                         # SKK dictionary server
+#+end_example
+
 * Personal Configuration
 
 Default values for machine-specific settings. To override these,
@@ -45,9 +53,9 @@ load line below.
 (defvar arjan/journal-directory "~/Documents/journal")
 (defvar arjan/sicp-load-path nil)
 (defvar arjan/gptel-model nil)
+(defvar arjan/enable-japanese-input nil)
 
-;; Uncomment to load personal settings:
-;; (load (expand-file-name "personal/settings.el" user-emacs-directory) 'noerror)
+(load (expand-file-name "personal/settings.el" user-emacs-directory) 'noerror)
 #+end_src
 
 * Environment
@@ -414,12 +422,12 @@ Register =clojuredart-mode= with the existing =clojure-lsp= client.
 
 #+begin_src emacs-lisp
 (with-eval-after-load 'lsp-clojure
-  (let ((client (gethash 'clojure-lsp lsp-clients)))
-    (when client
-      (let ((modes (lsp--client-major-modes client)))
-        (unless (memq 'clojuredart-mode modes)
-          (setf (lsp--client-major-modes client)
-                (append modes '(clojuredart-mode))))))))
+  (add-to-list 'lsp-language-id-configuration '(clojuredart-mode . "clojure"))
+  (lsp-register-client
+   (make-lsp-client
+    :new-connection (lsp-stdio-connection '("clojure-lsp"))
+    :major-modes '(clojuredart-mode)
+    :server-id 'clojure-lsp-cljd)))
 #+end_src
 
 ** Clojure Format on Save
@@ -621,7 +629,7 @@ sequenceDiagram
 #+begin_src emacs-lisp
 (use-package cornell-note
   :ensure nil
-  :load-path user-emacs-directory)
+  :load-path "lisp")
 #+end_src
 
 * Reading
@@ -725,6 +733,17 @@ to enable.
 
 #+begin_src emacs-lisp
 (use-package eca)
+#+end_src
+
+* Japanese Input
+
+Japanese input via DDSKK + macSKK. Requires =macism=, =macSKK=, and
+=yaskkserv2=. Set =arjan/enable-japanese-input= to =t= in
+=personal/settings.el= to enable.
+
+#+begin_src emacs-lisp
+(when arjan/enable-japanese-input
+  (load (expand-file-name "jp-lang.el" user-emacs-directory)))
 #+end_src
 
 * Startup Performance
