@@ -716,7 +716,7 @@ Local LLM via Ollama. Set =arjan/gptel-model= in =personal/settings.el=
 to enable.
 
 Optional Sugoi translator backend (local llama-server speaking the
-OpenAI API on =localhost:8080=). Set =arjan/enable-sugoi-translate= to
+OpenAI API on =localhost:8090=). Set =arjan/enable-sugoi-translate= to
 =t= in =personal/settings.el= to enable; =M-x sugoi-translate-region=
 sends the active region for JA/EN translation.
 
@@ -733,7 +733,7 @@ sends the active region for JA/EN translation.
     (defvar sugoi-backend
       (gptel-make-openai "Sugoi-Local"
         :protocol "http"
-        :host "localhost:8080"
+        :host "localhost:8090"
         :stream t
         :key "dummy-key"
         :models '(sugoi-14b)))
