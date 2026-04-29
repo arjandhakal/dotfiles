@@ -732,17 +732,18 @@ sends the active region for JA/EN translation.
   (when arjan/enable-sugoi-translate
     (defvar sugoi-backend
       (gptel-make-openai "Sugoi-Local"
+        :protocol "http"
         :host "localhost:8080"
         :stream t
         :key "dummy-key"
-        :models '("sugoi-14b")))
+        :models '(sugoi-14b)))
     (defun sugoi-translate-region ()
       "Translate the selected region using local Sugoi."
       (interactive)
       (let ((gptel-backend sugoi-backend)
-            (gptel-model "sugoi-14b")
-            (gptel-directives
-             '((default . "You are a Japanese/English translator. Provide only the direct translation of the user's text. Do not add commentary."))))
+            (gptel-model 'sugoi-14b)
+            (gptel--system-message
+             "You are a Japanese/English translator. Provide only the direct translation of the user's text. Do not add commentary."))
         (gptel-send)))))
 #+end_src
 
