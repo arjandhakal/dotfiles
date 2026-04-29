@@ -53,7 +53,8 @@ load line below.
 (defvar arjan/journal-directory "~/Documents/journal")
 (defvar arjan/sicp-load-path nil)
 (defvar arjan/gptel-model nil)
-(defvar arjan/enable-japanese-input true)
+(defvar arjan/enable-japanese-input nil)
+(defvar arjan/enable-sugoi-translate nil)
 
 (load (expand-file-name "personal/settings.el" user-emacs-directory) 'noerror)
 #+end_src
@@ -714,6 +715,11 @@ Requires =libvterm= and =cmake=: =brew install libvterm cmake=.
 Local LLM via Ollama. Set =arjan/gptel-model= in =personal/settings.el=
 to enable.
 
+Optional Sugoi translator backend (local llama-server speaking the
+OpenAI API on =localhost:8080=). Set =arjan/enable-sugoi-translate= to
+=t= in =personal/settings.el= to enable; =M-x sugoi-translate-region=
+sends the active region for JA/EN translation.
+
 #+begin_src emacs-lisp
 (use-package gptel
   :config
@@ -722,7 +728,22 @@ to enable.
           gptel-backend (gptel-make-ollama "Ollama"
                           :host "localhost:11434"
                           :stream t
-                          :models (list arjan/gptel-model)))))
+                          :models (list arjan/gptel-model))))
+  (when arjan/enable-sugoi-translate
+    (defvar sugoi-backend
+      (gptel-make-openai "Sugoi-Local"
+        :host "localhost:8080"
+        :stream t
+        :key "dummy-key"
+        :models '("sugoi-14b")))
+    (defun sugoi-translate-region ()
+      "Translate the selected region using local Sugoi."
+      (interactive)
+      (let ((gptel-backend sugoi-backend)
+            (gptel-model "sugoi-14b")
+            (gptel-directives
+             '((default . "You are a Japanese/English translator. Provide only the direct translation of the user's text. Do not add commentary."))))
+        (gptel-send)))))
 #+end_src
 
 ** Project
