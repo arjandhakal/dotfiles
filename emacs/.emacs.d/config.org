@@ -72,6 +72,27 @@ GUI Emacs on macOS does not inherit shell environment variables.
     (exec-path-from-shell-initialize)))
 #+end_src
 
+** Clipboard
+
+Terminal Emacs on macOS does not get native GUI clipboard integration, so
+copy killed text to the system clipboard with =pbcopy=. This makes Evil yanks
+available outside Emacs when running in Ghostty.
+
+#+begin_src emacs-lisp
+(defun arjan/copy-to-macos-clipboard (text)
+  "Copy TEXT to the macOS clipboard."
+  (when (and (eq system-type 'darwin)
+             (executable-find "pbcopy"))
+    (let ((process-connection-type nil))
+      (let ((proc (start-process "pbcopy" nil "pbcopy")))
+        (process-send-string proc text)
+        (process-send-eof proc)))))
+
+(when (eq system-type 'darwin)
+  (setq select-enable-clipboard t
+        interprogram-cut-function #'arjan/copy-to-macos-clipboard))
+#+end_src
+
 * User Interface
 ** Theme
 
