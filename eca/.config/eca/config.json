@@ -17,6 +17,24 @@
               }
             }
           }
+        },
+        "gpt55-high": {
+          "modelName": "gpt-5.5",
+          "extraPayload": {
+            "reasoning": {
+              "effort": "high",
+              "summary": "auto"
+            }
+          }
+        },
+        "gpt55-xhigh": {
+          "modelName": "gpt-5.5",
+          "extraPayload": {
+            "reasoning": {
+              "effort": "xhigh",
+              "summary": "auto"
+            }
+          }
         }
       }
     }
