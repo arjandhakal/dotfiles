@@ -1,0 +1,24 @@
+{
+  "providers": {
+    "openai": {
+      "models": {
+        "gpt-5.5": {
+          "variants": {
+            "h": {
+              "reasoning": {
+                "effort": "high",
+                "summary": "auto"
+              }
+            },
+            "xh": {
+              "reasoning": {
+                "effort": "xhigh",
+                "summary": "auto"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
