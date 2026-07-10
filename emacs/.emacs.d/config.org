@@ -534,7 +534,11 @@ server is provided by =ocaml-lsp-server= from the active opam switch.
 
 (use-package ocamlformat
   :after tuareg
-  :hook (tuareg-mode . ocamlformat-on-save-mode))
+  :hook (tuareg-mode . arjan/ocamlformat-on-save)
+  :preface
+  (defun arjan/ocamlformat-on-save ()
+    "Format the current OCaml buffer when it is saved."
+    (add-hook 'before-save-hook #'ocamlformat-before-save nil t)))
 
 (use-package utop
   :after tuareg
