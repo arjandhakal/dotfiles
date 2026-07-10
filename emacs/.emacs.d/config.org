@@ -417,6 +417,7 @@ Auto-install grammars and remap major modes to tree-sitter variants.
   :hook ((clojure-mode      . lsp)
          (clojurec-mode     . lsp)
          (clojuredart-mode  . lsp)
+         (tuareg-mode       . lsp-deferred)
          ((tsx-ts-mode
            typescript-ts-mode
            js-ts-mode) . lsp-deferred)
@@ -517,6 +518,29 @@ Shared setup for Lisp-family languages.
 #+begin_src emacs-lisp
 (use-package terraform-mode
   :custom (terraform-indent-level 4))
+#+end_src
+
+** OCaml
+
+OCaml editing, formatting, REPL support, and Dune project files. The language
+server is provided by =ocaml-lsp-server= from the active opam switch.
+
+#+begin_src emacs-lisp
+(use-package tuareg
+  :mode ("\\.ml[iylp]?\\'" . tuareg-mode))
+
+(use-package dune
+  :mode ("dune\\(?:-project\\|-workspace\\)?\\'" . dune-mode))
+
+(use-package ocamlformat
+  :after tuareg
+  :hook (tuareg-mode . ocamlformat-on-save-mode))
+
+(use-package utop
+  :after tuareg
+  :hook (tuareg-mode . utop-minor-mode)
+  :custom
+  (utop-command "opam exec -- utop -emacs"))
 #+end_src
 
 ** Scheme
