@@ -23,6 +23,7 @@ M-x all-the-icons-install-fonts
 *Language-specific (install as needed):*
 
 #+begin_example
+ghcup install ghc recommended && ghcup install hls recommended  # Haskell
 brew install clojure/tools/clojure leiningen    # Clojure
 brew install guile                               # Scheme / SICP
 brew install --cask racket                       # Racket
@@ -47,6 +48,13 @@ create =personal/settings.el= with your paths and uncomment the
 load line below.
 
 #+begin_src emacs-lisp
+;;; config.el --- Arjan's Emacs configuration -*- lexical-binding: t; -*-
+
+;;; Commentary:
+;; Generated from config.org.  Edit config.org rather than config.el.
+
+;;; Code:
+
 (defvar arjan/org-directory "~/Documents/")
 (defvar arjan/org-agenda-files nil)
 (defvar arjan/org-roam-directory "~/Documents/roam-notes")
@@ -414,7 +422,8 @@ Auto-install grammars and remap major modes to tree-sitter variants.
 #+begin_src emacs-lisp
 (use-package lsp-mode
   :defer t
-  :hook ((clojure-mode      . lsp)
+  :hook ((haskell-mode      . lsp-deferred)
+         (clojure-mode      . lsp)
          (clojurec-mode     . lsp)
          (clojuredart-mode  . lsp)
          (tuareg-mode       . lsp-deferred)
@@ -545,6 +554,42 @@ server is provided by =ocaml-lsp-server= from the active opam switch.
   :hook (tuareg-mode . utop-minor-mode)
   :custom
   (utop-command "opam exec -- utop -emacs"))
+#+end_src
+
+** Haskell
+
+Haskell editing uses =haskell-mode=, GHCi for the interactive REPL, and
+=haskell-language-server= (installed by GHCup) for completion, navigation,
+diagnostics, code actions, and formatting. HLS automatically detects Cabal and
+Stack projects. Formatting on save is local to Haskell buffers.
+
+#+begin_src emacs-lisp
+(use-package haskell-mode
+  :mode ("\\.hs\\'" . haskell-mode)
+  :hook ((haskell-mode . interactive-haskell-mode)
+         (haskell-mode . arjan/haskell-format-on-save))
+  :bind (:map haskell-mode-map
+         ("C-c C-l" . haskell-process-load-file)
+         ("C-c C-z" . haskell-interactive-switch)
+         ("C-c C-t" . haskell-process-do-type))
+  :preface
+  (defun arjan/haskell-format-on-save ()
+    "Format the current Haskell buffer through HLS when it is saved."
+    (add-hook 'before-save-hook #'arjan/haskell-lsp-format-buffer nil t))
+
+  (defun arjan/haskell-lsp-format-buffer ()
+    "Ask HLS to format the current buffer when its workspace is ready."
+    (when (bound-and-true-p lsp-mode)
+      (lsp-format-buffer)))
+  :custom
+  (haskell-process-type 'auto)
+  (haskell-process-auto-import-loaded-modules t)
+  (haskell-process-log t))
+
+(use-package lsp-haskell
+  :after (lsp-mode haskell-mode)
+  :custom
+  (lsp-haskell-server-path "haskell-language-server-wrapper"))
 #+end_src
 
 ** Scheme
@@ -841,4 +886,6 @@ Reset GC threshold after startup completes.
 (add-hook 'emacs-startup-hook
           (lambda ()
             (setq gc-cons-threshold (* 2 1024 1024))))
+
+;;; config.el ends here
 #+end_src
