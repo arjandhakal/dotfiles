@@ -505,7 +505,12 @@ Shared setup for Lisp-family languages.
 (use-package clojure-mode
   :mode ("\\.edn\\'" . clojure-mode))
 
-(use-package cider)
+(use-package cider
+  :vc (:url "https://github.com/clojure-emacs/cider.git"
+       :lisp-dir "lisp"
+       :rev "v2.0.0")
+  :init
+  (package-activate 'cider))
 (use-package clomacs)
 #+end_src
 
