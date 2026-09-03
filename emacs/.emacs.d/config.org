@@ -320,6 +320,31 @@ Redirect package data to =etc/= and =var/= to keep =.emacs.d= clean.
 ;; Run M-x all-the-icons-install-fonts on first setup
 (use-package all-the-icons-dired
   :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-subtree
+  :commands (dired-subtree-toggle dired-subtree-cycle)
+  :config
+  (setq dired-subtree-line-prefix "  "
+        dired-subtree-use-backgrounds nil))
+
+(use-package dired-sidebar
+  :commands (dired-sidebar-toggle-sidebar)
+  :config
+  (setq dired-sidebar-theme 'all-the-icons
+        dired-sidebar-use-custom-font t
+        dired-sidebar-use-term-integration t))
+
+(defun arjan/dired-sidebar-project-toggle ()
+  "Toggle dired-sidebar at the current project root."
+  (interactive)
+  (require 'project)
+  (let ((default-directory
+         (if-let ((project (project-current)))
+             (project-root project)
+           default-directory)))
+    (dired-sidebar-toggle-sidebar)))
+
+(define-key my-spc-map (kbd "e") #'arjan/dired-sidebar-project-toggle)
 #+end_src
 
 * Programming
