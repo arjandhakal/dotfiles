@@ -43,9 +43,10 @@ cargo install yaskkserv2                         # SKK dictionary server
 
 * Personal Configuration
 
-Default values for machine-specific settings. To override these,
-create =personal/settings.el= with your paths and uncomment the
-load line below.
+Portable defaults are kept in this file. To override them on one laptop,
+create =personal/settings.el= (it is ignored by Git); no changes to this file
+are needed. Prefer paths beginning with =~/= rather than hard-coded
+=\/Users/...= paths.
 
 #+begin_src emacs-lisp
 ;;; config.el --- Arjan's Emacs configuration -*- lexical-binding: t; -*-
@@ -55,10 +56,14 @@ load line below.
 
 ;;; Code:
 
-(defvar arjan/org-directory "~/Documents/")
+(defvar arjan/org-directory "~/Documents/"
+  "Root directory for personal Org files.")
 (defvar arjan/org-agenda-files nil)
 (defvar arjan/org-roam-directory "~/Documents/roam-notes")
 (defvar arjan/journal-directory "~/Documents/journal")
+(defvar arjan/project-notes-directory nil
+  "Directory for private project notes.
+When nil, use project-notes/ below `arjan/org-directory`.")
 (defvar arjan/sicp-load-path nil)
 (defvar arjan/gptel-model nil)
 (defvar arjan/enable-japanese-input nil)
@@ -649,6 +654,83 @@ Stack projects. Formatting on save is local to Haskell buffers.
   (setq org-babel-clojure-backend 'cider
         org-agenda-files arjan/org-agenda-files
         org-directory arjan/org-directory))
+#+end_src
+
+** Private Project Notes
+
+Project notes are deliberately stored outside the current project worktree,
+so exploratory thoughts are persistent without becoming Git files. By
+default, notes go to =project-notes/= below =arjan/org-directory= (normally
+=~/Documents/project-notes/=).
+
+To use the notes on multiple laptops, put that directory in a synchronized
+location (for example, a private Git repository, Syncthing, or a cloud-synced
+folder). Set the location separately on each laptop in the ignored
+=personal/settings.el= when necessary:
+
+#+begin_example
+(setq arjan/org-directory "~/path/to/synced/org/")
+;; Optional: use a separate synced directory for project notes.
+(setq arjan/project-notes-directory "~/path/to/synced/project-notes/")
+#+end_example
+
+Use =M-x arjan/project-note=, or =SPC n= in Evil normal state, while visiting
+a file in a project. It creates one Org file per project and captures a
+timestamped entry under the =Notes= heading. Use =SPC N= to open the current
+project's existing note for reading. Use one entry per thought;
+turn conclusions, TODOs, or durable technical decisions into clear headings.
+Keep actionable TODOs in the agenda files and promote reusable knowledge to
+an org-roam note or project documentation. Avoid absolute =file:= links when
+the notes are synchronized across laptops; use URLs or project-relative links
+instead.
+
+#+begin_src emacs-lisp
+(defun arjan/project-notes-root ()
+  "Return the directory used for private project notes."
+  (file-name-as-directory
+   (expand-file-name (or arjan/project-notes-directory "project-notes/")
+                     arjan/org-directory)))
+
+(defun arjan/current-project-note-file ()
+  "Return the private Org note file for the current project."
+  (require 'project)
+  (let* ((project (project-current))
+         (root (and project (project-root project))))
+    (unless root
+      (user-error "The current buffer is not inside a project"))
+    (let* ((name (file-name-nondirectory (directory-file-name root)))
+           (slug (replace-regexp-in-string "[^[:alnum:]_.-]+" "-" name)))
+      (expand-file-name (concat slug ".org")
+                        (arjan/project-notes-root)))))
+
+(defun arjan/project-note ()
+  "Capture a timestamped note outside the current project's worktree."
+  (interactive)
+  (require 'org-capture)
+  (let ((file (arjan/current-project-note-file)))
+    (make-directory (file-name-directory file) t)
+    (unless (file-exists-p file)
+      (with-temp-file file
+        (insert "#+title: Project notes - "
+                (file-name-base file)
+                "\n\n")))
+    (let ((org-capture-templates
+           `(("p" "Project note" entry
+              (file+headline ,file "Notes")
+              "* %U\n%?\n"
+              :empty-lines 1))))
+      (org-capture nil "p"))))
+
+(defun arjan/open-project-note ()
+  "Open the existing private Org note for the current project."
+  (interactive)
+  (let ((file (arjan/current-project-note-file)))
+    (if (file-exists-p file)
+        (find-file file)
+      (user-error "No project note exists yet: %s" file))))
+
+(define-key my-spc-map (kbd "n") #'arjan/project-note)
+(define-key my-spc-map (kbd "N") #'arjan/open-project-note)
 #+end_src
 
 ** Org Modern
