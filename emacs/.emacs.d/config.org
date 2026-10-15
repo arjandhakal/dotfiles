@@ -453,9 +453,6 @@ Auto-install grammars and remap major modes to tree-sitter variants.
 (use-package lsp-mode
   :defer t
   :hook ((haskell-mode      . lsp-deferred)
-         (clojure-mode      . lsp)
-         (clojurec-mode     . lsp)
-         (clojuredart-mode  . lsp)
          (tuareg-mode       . lsp-deferred)
          ((tsx-ts-mode
            typescript-ts-mode
@@ -478,34 +475,6 @@ Auto-install grammars and remap major modes to tree-sitter variants.
     :new-connection (lsp-stdio-connection '("typescript-language-server" "--stdio"))
     :major-modes '(typescript-ts-mode tsx-ts-mode)
     :server-id 'ts-ls)))
-#+end_src
-
-** ClojureDart LSP Registration
-
-Register =clojuredart-mode= with the existing =clojure-lsp= client.
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'lsp-clojure
-  (add-to-list 'lsp-language-id-configuration '(clojuredart-mode . "clojure"))
-  (lsp-register-client
-   (make-lsp-client
-    :new-connection (lsp-stdio-connection '("clojure-lsp"))
-    :major-modes '(clojuredart-mode)
-    :server-id 'clojure-lsp-cljd)))
-#+end_src
-
-** Clojure Format on Save
-
-Auto-format Clojure files via LSP (cljfmt) before saving.
-
-#+begin_src emacs-lisp
-(defun my-clojure-lsp-format-hook ()
-  (add-hook 'before-save-hook #'lsp-format-buffer nil 'local))
-
-(add-hook 'clojure-mode-hook #'my-clojure-lsp-format-hook)
-(add-hook 'clojurescript-mode-hook #'my-clojure-lsp-format-hook)
-(add-hook 'clojurec-mode-hook #'my-clojure-lsp-format-hook)
-(add-hook 'clojuredart-mode-hook #'my-clojure-lsp-format-hook)
 #+end_src
 
 ** Lisp
