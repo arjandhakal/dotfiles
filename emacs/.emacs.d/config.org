@@ -948,6 +948,32 @@ sends the active region and shows the translation in a popup.
 (use-package eca)
 #+end_src
 
+** Pi Session Sync
+
+Attach to an existing Pi terminal session with =M-x connect-pi=. The client
+is vendored in =lisp/sync-emacs.el= from =clanker_jiken/sync-emacs=; install
+that Pi package globally and run =/reload= in existing terminals first.
+
+=C-c P c= connects, =C-c P b= sends the accessible buffer (including unsaved
+edits), =C-c P r= sends a region, and =C-c P a= associates the current source
+buffer with a connection. The uppercase =P= leaves =C-c p= available for
+other commands. In the transcript, =i= opens a draft and =C-c C-c= sends it.
+
+#+begin_src emacs-lisp
+(use-package sync-emacs
+  :ensure nil
+  :load-path "lisp"
+  :commands (connect-pi sync-emacs-compose sync-emacs-associate-session)
+  :bind (("C-c P c" . connect-pi)
+         ("C-c P b" . sync-emacs-send-buffer)
+         ("C-c P r" . sync-emacs-send-region)
+         ("C-c P a" . sync-emacs-associate-session))
+  :config
+  (with-eval-after-load 'evil
+    (evil-set-initial-state 'sync-emacs-mode 'emacs)
+    (evil-set-initial-state 'sync-emacs-compose-mode 'insert)))
+#+end_src
+
 * Japanese Input
 
 Japanese input via DDSKK + macSKK. Requires =macism=, =macSKK=, and
