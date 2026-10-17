@@ -14,7 +14,7 @@
 (require 'use-package)
 (setq use-package-always-ensure t)
 
-;; Separate file for Customize
+;; Separat file for Customize
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file 'noerror)
 
